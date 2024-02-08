@@ -6,7 +6,7 @@ import { fetcher } from "@/lib/swr/fetcher";
 import Link from "next/link";
 import { ProductType } from "@/types/product.type";
 
-const DetailProductPage = ({products}: {products: ProductType}) => {
+const DetailProductPage = ({ products }: { products: ProductType }) => {
   // client side rendering
   // const {query} = useRouter()
   // const { data, error, isLoading } = useSWR(`/api/product/${query.product}`, fetcher)
@@ -27,14 +27,43 @@ const DetailProductPage = ({products}: {products: ProductType}) => {
       <p>{products.name}</p>
       <p>{products.price}</p>
       <p>{products.color}</p>
-      <Link href={'/product'}>Kembali</Link>
+      <Link href={"/product"}>Kembali</Link>
     </main>
   );
 };
 
 export default DetailProductPage;
 
-// export async function getServerSideProps({params}: {params: {product: string}}) {
+export async function getServerSideProps({
+  params,
+}: {
+  params: { product: string };
+}) {
+  let res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/product/${params.product}`
+  );
+  const result = await res.json();
+
+  return {
+    props: {
+      products: result.data,
+    },
+  };
+}
+
+// export async function getStaticPaths() {
+//   const res = await fetch('http://localhost:3000/api/product')
+//   const result = await res.json()
+//   const paths = result.data.map((data: ProductType) => ({
+//       params: {
+//           product: data.id
+//       }
+//   }))
+
+//   return {paths, fallback: false}
+// }
+
+// export async function getStaticProps({params}: {params: {product: string}}) {
 //   let res = await fetch(`http://localhost:3000/api/product/${params.product}`)
 //   const result = await res.json()
 
@@ -44,26 +73,3 @@ export default DetailProductPage;
 //       }
 //   }
 // }
-
-export async function getStaticPaths() {
-  const res = await fetch('http://localhost:3000/api/product')
-  const result = await res.json()
-  const paths = result.data.map((data: ProductType) => ({
-      params: {
-          product: data.id
-      }
-  }))
-
-  return {paths, fallback: false}
-}
-
-export async function getStaticProps({params}: {params: {product: string}}) {
-  let res = await fetch(`http://localhost:3000/api/product/${params.product}`)
-  const result = await res.json()
-
-  return {
-      props: {
-          products: result.data
-      }
-  }
-}
